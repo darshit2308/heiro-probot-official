@@ -1,131 +1,134 @@
-# Hiero Workflow Probot
+# Hiero Workflow Service (Probot POC)
 
-A GitHub App built with **Probot** that automates contributor workflows and improves developer onboarding for the **Hiero ecosystem**.
-
-The bot listens to GitHub events such as issues and pull requests and performs helpful actions like welcoming contributors, labeling documentation PRs, and tracking contributor milestones.
+A **Proof of Concept (POC)** demonstrating how to horizontally scale Hiero's repository bots using a centralized **GitHub App built with Probot**.
 
 ---
 
-# Features
+## Overview
 
-## 1️⃣ Contributor Onboarding
+The Hiero Workflow Service replaces decentralized GitHub Action bots with a **single centralized automation service**.
 
-When a user opens a new issue, the bot reads configuration from `.github/hiero.yml`.
-
-If a `welcome_message` is present, the bot automatically posts it as a comment.
-
-Example config:
-
-```
-welcome_message: |
-  👋 Welcome to Hiero!
-  Thank you for opening your first issue.
-  A maintainer will review it soon.
-```
-
-This allows repositories to customize onboarding messages.
+Instead of maintaining identical bot logic across multiple repositories, the automation is hosted once and installed at the **organization level**, enabling scalable and maintainable repository automation.
 
 ---
 
-## 2️⃣ Automatic Documentation Labeling
+## The Problem
 
-When a pull request is opened or reopened:
+The current Hiero C++ SDK uses **repository-level GitHub Actions** (for example `.github/workflows/on-comment.yaml`) to handle bot commands.
 
-* The bot checks all changed files
-* If any file ends with `.md`
-* The PR automatically gets the `documentation` label
+While functional, this approach introduces several challenges:
 
-This helps maintainers quickly identify documentation contributions.
-
----
-
-## 3️⃣ Contributor Milestone Tracker
-
-The bot celebrates contributor milestones by tracking merged pull requests.
-
-Milestones:
-
-* 🎉 **1 merged PR** → Welcome message
-* 🔥 **5 merged PRs** → Core contributor message
-* 🏆 **10 merged PRs** → Legendary contributor recognition
-
-Because GitHub's search index can be delayed, the bot includes a workaround to ensure the most recent merged PR is counted correctly.
+* Bot logic must be duplicated across every repository.
+* Workflow YAML and JavaScript scripts need to be manually maintained.
+* Updates require modifying multiple repositories.
+* Automation logic becomes harder to scale across the organization.
 
 ---
 
-# Installation
+## The Solution
 
-Clone the repository:
+This project ports the existing automation logic into a **centralized Probot service**.
 
-```
-git clone https://github.com/darshit2308/hiero-workflow-probot.git
-cd hiero-workflow-probot
-```
+The bot runs as a **GitHub App**, allowing the same automation logic to operate across multiple repositories without duplication.
 
-Install dependencies:
+Key improvements:
 
-```
-npm install
-```
+* **Zero Duplication**
+  The bot is deployed once and installed at the organization level.
 
-Start the Probot app:
+* **Native GitHub API Usage**
+  Replaces `github-script` wrappers with direct `context.octokit` API calls.
 
-```
-npm start
-```
+* **Centralized Automation**
+  All repository workflow logic is maintained in one service.
 
 ---
 
-# Configuration
+## Proof of Concept: `/assign` Command
 
-Add a configuration file in your repository:
+The current proof of concept implements the `/assign` command.
 
-```
-.github/hiero.yml
-```
-
-Example:
+The logic has been fully ported from the original GitHub Action workflow into:
 
 ```
-welcome_message: |
-  Welcome to the Hiero ecosystem!
-  Thanks for contributing 🚀
+/commands/assign.js
 ```
+
+The implementation preserves the exact **8-Gate validation system** used in the existing workflow.
+
+### Validation Steps
+
+1. **State Validation**
+   Ignores pull requests and bot-generated comments.
+
+2. **Label Validation**
+   Ensures the issue has the label:
+
+   ```
+   status: ready for dev
+   ```
+
+3. **Skill Level Detection**
+
+   Detects issue difficulty via labels such as:
+
+   * `skill: good first issue`
+   * `skill: intermediate`
+   * `skill: advanced`
+
+4. **Open Assignment Limits**
+
+   Limits users to a maximum of **2 active assignments**.
+
+5. **Skill Prerequisite Validation**
+
+   Ensures contributors satisfy prerequisite skill requirements before assignment.
+
+6. **Automated Label Transition**
+
+   Automatically updates labels when an issue is assigned:
+
+   ```
+   status: ready for dev  →  status: in progress
+   ```
 
 ---
 
-# Docker Setup
-
-Build the container:
+## Architecture
 
 ```
-docker build -t hiero-workflow-probot .
+GitHub Organization
+        │
+        ▼
+GitHub App (Probot Service)
+        │
+        ▼
+Command Handlers
+        │
+        ├── /assign
+        ├── /label
+        └── future commands
 ```
 
-Run the container:
-
-```
-docker run \
-  -e APP_ID=<app-id> \
-  -e PRIVATE_KEY=<pem-value> \
-  hiero-workflow-probot
-```
+This architecture allows the service to scale horizontally across multiple repositories while maintaining a single automation codebase.
 
 ---
 
-# Contributing
+## Future Scope
 
-Contributions are welcome!
+This proof of concept can be extended to support additional repository automation features such as:
 
-If you find a bug or want to suggest improvements:
-
-1. Open an issue
-2. Submit a pull request
-
-Please read the contributing guide before submitting changes.
+* `/unassign` commands
+* automatic issue triaging
+* pull request labeling
+* contributor progression tracking
+* automated project board updates
 
 ---
 
-# License
+## Tech Stack
 
-ISC © 2026 Darshit Khandelwal
+* **Probot**
+* **Node.js**
+* **GitHub Apps API**
+* **Octokit**
