@@ -1,6 +1,6 @@
 // helpers/api.js
 
-import { LABELS } from './constants.js'; // Ensure you have this file
+import { LABELS } from '../config/hiero-constants.js'; // Ensure you have this file
 import { checkDCO, checkGPG, checkMergeConflict, checkIssueLink } from './checks.js';
 import { buildBotComment, MARKER } from './comments.js';
 // import { buildBotComment } from './comments.js'; // We will need to port this next

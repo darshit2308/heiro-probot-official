@@ -91,3 +91,60 @@ export function parseIssueNumbers(body) {
   }
   return numbers;
 }
+
+/**
+ * Fetches each issue by number and checks whether the PR author is assigned.
+ */
+async function fetchAndCheckAssignees(context, fetchIssue, issueNumbers, prAuthor) {
+  const results = [];
+  for (const num of issueNumbers) {
+    try {
+      const issue = await fetchIssue(context, num);
+      const isAssigned = (issue.assignees || []).some(
+        (a) => a.login.toLowerCase() === prAuthor.toLowerCase()
+      );
+      results.push({ number: num, title: issue.title, isAssigned });
+    } catch (err) {
+      context.log.error(`Issue link check: could not fetch issue #${num}: ${err.message}`);
+    }
+  }
+  return results;
+}
+
+/**
+ * Checks whether the PR is linked to an issue and whether the PR author
+ * is assigned to that issue.
+ */
+export async function checkIssueLink(context, { fetchIssue, fetchClosingIssueNumbers }) {
+  const body = context.payload.pull_request?.body || '';
+  const prAuthor = context.payload.pull_request?.user?.login;
+
+  const issueNumbers = parseIssueNumbers(body);
+
+  if (issueNumbers.size === 0) {
+    const graphqlIssues = await fetchClosingIssueNumbers(context);
+    graphqlIssues.forEach((n) => issueNumbers.add(n));
+  }
+
+  if (issueNumbers.size === 0) {
+    context.log.info('Issue link check: no linked issues found');
+    return { passed: false, reason: 'no_issue_linked', issues: [] };
+  }
+
+  const linkedIssues = await fetchAndCheckAssignees(context, fetchIssue, issueNumbers, prAuthor);
+
+  if (linkedIssues.length === 0) {
+    context.log.info('Issue link check: all linked issues returned errors');
+    return { passed: false, reason: 'no_issue_linked', issues: [] };
+  }
+
+  const allAssigned = linkedIssues.every((i) => i.isAssigned);
+  if (!allAssigned) {
+    const missing = linkedIssues.filter((i) => !i.isAssigned).map((i) => `#${i.number}`).join(', ');
+    context.log.info(`Issue link check: author ${prAuthor} not assigned to all linked issues (missing: ${missing})`);
+    return { passed: false, reason: 'not_assigned', issues: linkedIssues };
+  }
+
+  context.log.info('Issue link check: passed (author assigned to all linked issues)');
+  return { passed: true, reason: null, issues: linkedIssues };
+}

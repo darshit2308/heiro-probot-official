@@ -1,8 +1,8 @@
 // helpers/comments.js
 
 // Adjust this import if you have a constants file, or just define it here:
-const MAINTAINER_TEAM = '@hiero-ledger/maintainers'; 
-export const MARKER = '';
+const MAINTAINER_TEAM = '@hiero-ledger/hiero-sdk-cpp-maintainers';  
+const MARKER = '<!-- bot:pr-helper -->';
 
 const SIGNING_GUIDE = 'https://github.com/hiero-ledger/hiero-sdk-cpp/blob/main/docs/training/signing.md';
 const MERGE_CONFLICTS_GUIDE = 'https://github.com/hiero-ledger/hiero-sdk-cpp/blob/main/docs/training/merge-conflicts.md';

@@ -8,6 +8,8 @@ export const LABELS = Object.freeze({
     BEGINNER:         'skill: beginner',
     INTERMEDIATE:     'skill: intermediate',
     ADVANCED:         'skill: advanced',
+    NEEDS_REVIEW:   'status: needs review',
+    NEEDS_REVISION: 'status: needs revision',
 });
 
 export const ISSUE_STATE = Object.freeze({

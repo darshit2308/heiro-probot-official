@@ -1,4 +1,5 @@
 import { handleAssign } from "./commands/assign.js";
+import { addAssignees, runAllChecksAndComment, swapStatusLabel } from './helpers/api.js';
 
 const ASSIGN_COMMAND = /^\s*\/assign\s*$/i;
 
