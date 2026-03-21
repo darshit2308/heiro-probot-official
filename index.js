@@ -10,7 +10,9 @@ export default (app) => {
     const { issue, comment } = context.payload;
 
     if (issue.pull_request) return app.log.info("Ignored PR comment");
-    if (context.isBot) return app.log.info("Ignored bot comment");
+    if (context.payload.comment.user.type === 'Bot') {
+      return app.log.info('Ignored bot comment');
+    }
 
     if (!ASSIGN_COMMAND.test(comment.body)) return;
 
