@@ -13,7 +13,7 @@
 
 ## The Problem
 
-The Hiero organisation currently maintains **duplicated bot logic** across every repository. Each repo has its own YAML workflows and JavaScript scripts. Changing one rule means touching every repo — a maintenance nightmare that doesn't scale.
+The Hiero organisation currently maintains **duplicated bot logic** across every repository. Each repo has its own YAML workflows and JavaScript scripts. Changing one rule means touching every repo, a maintenance nightmare that doesn't scale.
 
 ```
 Before:  hiero-sdk-cpp/.github/scripts/  ←  4 JS files + 3 YAML workflows
@@ -29,7 +29,7 @@ After:   hiero-workflow-probot/          ←  1 centralised service
 
 ## The Solution
 
-A single **Probot GitHub App** that replaces all per-repo bot logic. Install it on any Hiero repository with one click. Update the logic once — every repo benefits instantly.
+A single **Probot GitHub App** that replaces all per-repo bot logic. Install it on any Hiero repository with one click. Update the logic once, every repo benefits instantly.
 
 ---
 
