@@ -191,6 +191,13 @@ A logic change that previously required N pull requests across N repositories no
 
 ---
 
+## 🎥 Live Demonstration
+Watch the MVP in action: [**Hiero Workflow Service MVP: Issue & PR Automation Demo**](https://youtu.be/1l5AqbGxl5o)
+*(Shows the local Probot server catching webhooks, mutating issue states, and generating the real-time PR validation dashboard).*
+
+---
+
+
 ## Contributing
 
 This project follows the same contribution standards as the broader Hiero ecosystem — DCO sign-off, GPG signatures, and issue-linked PRs required.
